@@ -2,7 +2,7 @@ name: Update africast submodule
 
 # Keeps the africast submodule (tracking workshop-f4sg-africast's gh-pages
 # branch, per .gitmodules) pointed at its latest commit, and publishes the
-# result on master (this repo's own site branch).
+# result on main (this repo's own site branch).
 #
 # Triggers:
 #   - repository_dispatch from workshop-f4sg-africast's own workflow, sent
@@ -57,5 +57,5 @@ jobs:
             git commit -m "Update africast submodule
 
           Triggered by: ${{ github.event_name }}${{ github.event.client_payload.repo && format(' from {0}', github.event.client_payload.repo) || '' }}"
-            git push origin HEAD:master
+            git push origin HEAD:main
           fi
