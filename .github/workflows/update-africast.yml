@@ -33,13 +33,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: true
           persist-credentials: true
 
       - name: Fetch latest africast commit
+        # Deliberately not using actions/checkout's own `submodules: true`:
+        # it does a --depth=1 submodule fetch of just the pinned commit,
+        # which never creates the origin/gh-pages remote-tracking ref that
+        # `--remote` below needs ("Unable to find refs/remotes/origin/
+        # gh-pages revision"). A plain (non-shallow) init avoids that.
         run: |
           git submodule sync --recursive
-          git submodule update --init --remote --recursive
+          git submodule update --init --recursive
+          git submodule update --remote --recursive
 
       - name: Commit and push if changed
         run: |
