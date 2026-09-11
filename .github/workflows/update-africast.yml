@@ -65,5 +65,12 @@ jobs:
             git commit -m "Update africast submodule
 
           Triggered by: ${{ github.event_name }}${{ github.event.client_payload.repo && format(' from {0}', github.event.client_payload.repo) || '' }}"
-            git push origin HEAD:main
+            # Retry with a rebase in case main moved since checkout (an
+            # unrelated push landing mid-run) -- this commit only touches
+            # the submodule pointer, so rebasing it is always safe.
+            for i in 1 2 3; do
+              git push origin HEAD:main && break
+              git fetch origin main
+              git rebase origin/main
+            done
           fi
