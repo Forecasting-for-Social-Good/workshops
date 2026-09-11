@@ -33,17 +33,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          # submodules: true is needed here even though it only gets us a
+          # --depth=1 fetch of the pinned commit (see below): it's what sets
+          # up the git@github.com: -> https://github.com/ URL rewrite and
+          # persists checkout's auth token into the submodule's local git
+          # config, since .gitmodules points at africast over SSH and the
+          # runner has no SSH key for it.
+          submodules: true
           persist-credentials: true
 
       - name: Fetch latest africast commit
-        # Deliberately not using actions/checkout's own `submodules: true`:
-        # it does a --depth=1 submodule fetch of just the pinned commit,
-        # which never creates the origin/gh-pages remote-tracking ref that
-        # `--remote` below needs ("Unable to find refs/remotes/origin/
-        # gh-pages revision"). A plain (non-shallow) init avoids that.
+        # actions/checkout's submodule fetch above is --depth=1 against the
+        # currently pinned commit, which never creates an origin/gh-pages
+        # remote-tracking ref -- `submodule update --remote` needs one
+        # ("Unable to find refs/remotes/origin/gh-pages revision"). Fetch it
+        # explicitly (reusing the credentials/URL-rewrite already set up by
+        # checkout above) before asking `--remote` to resolve it.
         run: |
           git submodule sync --recursive
-          git submodule update --init --recursive
+          git -C africast fetch origin +refs/heads/gh-pages:refs/remotes/origin/gh-pages
           git submodule update --remote --recursive
 
       - name: Commit and push if changed
